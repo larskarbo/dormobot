@@ -1,0 +1,111 @@
+{
+  "sessions": [
+    {
+      "id": "912275377:912275377",
+      "data": {
+        "entries": [
+          {
+            "date": "2020-06-10T23:23:41.855Z",
+            "type": "evening",
+            "answers": {
+              "coffee": false,
+              "daytime_function": 3,
+              "gotobed": "02:00"
+            }
+          },
+          {
+            "date": "2020-06-11T21:44:28.451Z",
+            "type": "evening",
+            "answers": {
+              "coffee": false,
+              "daytime_function": 3,
+              "bedtime": "02:00"
+            }
+          }
+        ],
+        "quiz": {
+          "question": 3,
+          "answers": {
+            "coffee": true,
+            "daytimefunction": 1,
+            "bedtime": "01:00",
+            "sleep_onset_delay": 20,
+            "wake_up": "08:00",
+            "out_of_bed": "08:05"
+          },
+          "questions": [
+            {
+              "text": "How long time did you spend to fall asleep?",
+              "key": "sleep_onset_delay",
+              "alternatives": [
+                {
+                  "text": "20 min",
+                  "value": 20
+                },
+                {
+                  "text": "30 min",
+                  "value": 30
+                }
+              ]
+            },
+            {
+              "text": "When did you wake up?",
+              "key": "wake_up",
+              "alternatives": [
+                {
+                  "text": "07:30",
+                  "value": "07:30"
+                },
+                {
+                  "text": "08:00",
+                  "value": "08:00"
+                }
+              ]
+            },
+            {
+              "text": "When did you go out of bed?",
+              "key": "out_of_bed",
+              "alternatives": [
+                {
+                  "text": "08:00",
+                  "value": "08:00"
+                },
+                {
+                  "text": "08:05",
+                  "value": "08:05"
+                }
+              ]
+            },
+            {
+              "text": "How did you feel? 🥱",
+              "key": "morning_feeling",
+              "alternatives": [
+                {
+                  "text": "1 Bad",
+                  "value": 1
+                },
+                {
+                  "text": "2",
+                  "value": 2
+                },
+                {
+                  "text": "3",
+                  "value": 3
+                },
+                {
+                  "text": "4",
+                  "value": 4
+                },
+                {
+                  "text": "5 Very good",
+                  "value": 5
+                }
+              ]
+            }
+          ],
+          "questionIndex": 3
+        }
+      }
+    }
+  ]
+}
