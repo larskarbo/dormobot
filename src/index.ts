@@ -87,9 +87,7 @@ bot.command('evening', async ctx => {
     type: 'evening',
     questionIndex: -1,
     questions: eveningQuestions,
-    answers: {
-      ...ctx.session.quiz.answers,
-    },
+    answers: {},
   };
   ctx.session.quiz = quiz;
   ctx.session.quizRunning = true;
@@ -102,9 +100,7 @@ bot.command('morning', async ctx => {
     type: 'morning',
     questionIndex: -1,
     questions: morningQuestions,
-    answers: {
-      ...ctx.session.quiz.answers,
-    },
+    answers: {},
   };
   ctx.session.quiz = quiz;
   ctx.session.quizRunning = true;
