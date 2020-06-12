@@ -33,6 +33,7 @@ bot.use(
 
 bot.command("start", async ctx => {
   // ctx.session.done = 0; // restart done counter
+  ctx.session.quiz = {}
   await ctx.reply("Welcome to the Dormo Bot! ⭐️");
   await ctx.reply("/evening /morning");
 });
