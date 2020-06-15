@@ -140,13 +140,11 @@ bot.command("export", async ctx => {
   const yo = await db
     .get("entries")
     .filter({
-      user: "larskarbo"
+      user: ctx.from?.username
     })
     .value()
 
   console.log(yo)
-  // let txt = ""
-  yo.forEach()
 
   await ctx.reply("```\n" + JSON.stringify(yo) + "\n```")
 });
