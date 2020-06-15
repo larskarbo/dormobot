@@ -1,8 +1,8 @@
 module.exports = {
   apps : [{
     name: 'dormobot',
-    script: 'lib/index.js',
-
+    script: './node_modules/.bin/ts-node',
+    args: 'src/index.ts'
   },
   // {
   //   name: "dormobot",
