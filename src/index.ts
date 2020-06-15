@@ -1,21 +1,16 @@
-import {
-  Telegraf,
-  Markup,
-  Extra,
-  Scene,
-  Context as TelegrafContext,
-} from 'telegraf';
-import { v4 as uuidv4 } from 'uuid';
-import eveningQuestions from './eveningQuestions';
-import morningQuestions from './morningQuestions';
-const LocalSession = require('telegraf-session-local');
+import Telegraf, { Markup, Context } from "telegraf";
+import { v4 as uuidv4 } from "uuid";
+import eveningQuestions from "./eveningQuestions";
+import morningQuestions from "./morningQuestions";
+import * as moment from 'moment'
+const LocalSession = require("telegraf-session-local");
 
-const low = require('lowdb');
-const FileAsync = require('lowdb/adapters/FileAsync');
+const low = require("lowdb");
+const FileAsync = require("lowdb/adapters/FileAsync");
 
-const adapter = new FileAsync('db.json');
+const adapter = new FileAsync("db.json");
 
-let db;
+let db: any;
 const initAdapter = async () => {
   db = await low(adapter);
   await db.defaults({ entries: [] }).write();
@@ -28,47 +23,50 @@ interface Quiz {
   answers: {
     [property: string]: any;
   };
-  questions: {
-    [index: number]: Question;
-  };
+  questions: Array<Question>;
 }
 
-interface Context extends TelegrafContext {
-  session: {
-    quizRunning: Boolean;
-    quiz: Quiz;
-  };
+interface Session {
+  quiz: Quiz | null;
+  date: string
+}
+
+declare module "telegraf" {
+  interface Context {
+    session: Session;
+  }
 }
 
 const bot = new Telegraf(process.env.DORMOBOT_API_TOKEN as string);
 
 bot.use(
   new LocalSession({
-    database: 'state.json',
-    storage: LocalSession.storageMemory,
+    database: "state.json",
+    storage: LocalSession.storageMemory
   }).middleware()
 );
 
-bot.command('start', async ctx => {
+bot.command("start", async ctx => {
   // ctx.session.done = 0; // restart done counter
-  ctx.session.quiz = {};
-  await ctx.reply('Welcome to the Dormo Bot! ⭐️');
-  await ctx.reply('/evening /morning');
+  // ctx.session.quiz = null;
+  await ctx.reply("Welcome to the Dormo Bot! ⭐️");
+  await ctx.reply("/evening /morning");
 });
 
-type EntryType = 'evening' | 'morning';
+type EntryType = "evening" | "morning";
+
 interface Entry {
-  date: Date;
-  type: EntryType;
+  date: string;
+  user?: string;
   answers: {
     [propName: string]: any;
   };
-  user: string;
 }
 
 interface Alternative {
   text: string;
   value: any;
+  id?: string
 }
 
 interface Question {
@@ -78,74 +76,158 @@ interface Question {
   alternatives: Alternative[];
 }
 
-export interface Questions {
-  [index: number]: Question;
+export interface Questions extends Array<Question> {
 }
 
-bot.command('evening', async ctx => {
+
+bot.command("evening", async ctx => {
+  let dateMoment = moment()
+  if (dateMoment.hours() < 12) {
+    // after midnight but still count it as last day
+    dateMoment = dateMoment.subtract(1, "day")
+  }
+  const date = dateMoment.format("LL")
+
+
+  const alreadyEntry = await getAlreadyEntry(date)
   const quiz: Quiz = {
-    type: 'evening',
+    type: "evening",
     questionIndex: -1,
     questions: eveningQuestions,
-    answers: {},
+    answers: { ...alreadyEntry.answers }
   };
   ctx.session.quiz = quiz;
-  ctx.session.quizRunning = true;
+  ctx.session.date = date;
+
 
   nextQuestion(ctx);
 });
 
-bot.command('morning', async ctx => {
+const getAlreadyEntry = async (date: string) => {
+  const alreadyEntry = await db
+    .get("entries")
+    .find({
+      user: "larskarbo",
+      date: date
+    })
+    .value()
+  if(alreadyEntry){
+    return alreadyEntry
+  }
+  return {
+    answers: []
+  }
+}
+
+bot.command("morning", async ctx => {
+  const date =  moment().subtract(1, "day").format("LL")
+  const alreadyEntry = await getAlreadyEntry(date)
+
   const quiz: Quiz = {
-    type: 'morning',
+    type: "morning",
     questionIndex: -1,
     questions: morningQuestions,
-    answers: {},
+    answers: { ...alreadyEntry.answers }
   };
   ctx.session.quiz = quiz;
-  ctx.session.quizRunning = true;
+  ctx.session.date = date
 
   nextQuestion(ctx);
 });
 
-const keyboard = (alternatives, value: any) => {
+
+bot.command("export", async ctx => {
+  const yo = await db
+    .get("entries")
+    .filter({
+      user: "larskarbo"
+    })
+    .value()
+
+  console.log(yo)
+  // let txt = ""
+  yo.forEach()
+
+  await ctx.reply("```\n" + JSON.stringify(yo) + "\n```")
+});
+
+const keyboard = (alternatives: Alternative[], value: any) => {
   return Markup.inlineKeyboard(
-    alternatives.map(alt =>
-      Markup.callbackButton(
+    alternatives.map(alt => {
+      if (!alt.id) {
+        throw new Error("please add id!")
+      }
+      return Markup.callbackButton(
         value === alt.value ? `→ ${alt.text} ←` : alt.text,
         alt.id
       )
+    }
     )
   );
 };
 
 const finish = (ctx: Context) => {
   ctx.reply(
-    'Finish!',
-    Markup.inlineKeyboard([Markup.callbackButton('Save', 'save')]).extra()
+    "Finish!",
+    Markup.inlineKeyboard([Markup.callbackButton("Save", "save")]).extra()
   );
 };
 
-bot.action('save', async ctx => {
-  if (!ctx.session.quizRunning) {
+bot.action("save", async ctx => {
+  if (!ctx.session.quiz) {
     return;
   }
+
   const entry: Entry = {
-    date: new Date(),
-    type: ctx.session.quiz.type,
+    date: ctx.session.date,
+    // type: ctx.session.quiz.type,
     answers: ctx.session.quiz.answers,
-    user: ctx.from?.username,
+    user: ctx.from?.username
   };
+
   ctx.editMessageReplyMarkup(Markup.inlineKeyboard([]));
-  await db
-    .get('entries')
-    .push(entry)
-    .write();
-  ctx.reply(`Added your ${ctx.session.quiz.type} entry ✅`);
-  ctx.session = {};
+
+  const yo = await db
+    .get("entries")
+    .filter({
+      user: "larskarbo",
+      date: entry.date
+    })
+    .value()
+
+  console.log('yo: ', yo);
+  if (yo.length) {
+    console.log("update!")
+    await db.get('entries')
+      .find({
+        user: "larskarbo",
+        date: entry.date
+      })
+      .assign({
+        answers: {
+          ...yo[0].answers,
+          ...entry.answers
+        }
+      })
+      .write()
+  } else {
+    console.log("add!")
+    await db
+      .get("entries")
+      .push(entry)
+      .write();
+  }
+
+
+
+  ctx.reply(`Added your ${ctx.session.quiz.type} entry ✅\n\nQuick commands: \n→ /morning\n→ /evening\n→ /export`);
+  ctx.session.quiz = null
 });
 
 const nextQuestion = (ctx: Context) => {
+  if (!ctx.session.quiz) {
+    return
+  }
   const questions = ctx.session.quiz.questions;
   ctx.session.quiz.questionIndex += 1;
   const thisIndex = ctx.session.quiz.questionIndex;
@@ -156,16 +238,19 @@ const nextQuestion = (ctx: Context) => {
 
   const alts = q.alternatives.map(a => ({
     ...a,
-    id: uuidv4(),
+    id: uuidv4()
   }));
 
   alts.forEach(a => {
     bot.action(a.id, async ctx => {
+      if (!ctx.session.quiz) {
+        return
+      }
       await ctx.answerCbQuery();
       ctx.session.quiz.answers[q.key] = a.value;
       ctx
         .editMessageReplyMarkup(keyboard(alts, ctx.session.quiz.answers[q.key]))
-        .catch(() => {});
+        .catch(() => { });
       if (thisIndex == ctx.session.quiz.questionIndex) {
         nextQuestion(ctx);
       }
@@ -175,11 +260,11 @@ const nextQuestion = (ctx: Context) => {
   ctx.reply(q.text, keyboard(alts, ctx.session.quiz.answers[q.key]).extra());
 };
 
-bot.on('text', ctx => {
-  if (ctx.session.quizRunning == true) {
+bot.on("text", ctx => {
+  if (ctx.session.quiz) {
     const questions = ctx.session.quiz.questions;
     const q = questions[ctx.session.quiz.questionIndex];
-    if (q.validateFn) {
+    if (q.validateFn && ctx.message && ctx.message.text) {
       if (q.validateFn(ctx.message.text)) {
         ctx.session.quiz.answers[q.key] = ctx.message.text;
         return nextQuestion(ctx);

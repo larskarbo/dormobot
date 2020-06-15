@@ -1,0 +1,70 @@
+{
+  "sessions": [],
+  "entries": [
+    {
+      "date": "June 10, 2020",
+      "answers": {
+        "coffee": false,
+        "daytime_function": 3,
+        "bedtime": "02:00",
+        "sleep_onset_delay": "35",
+        "wake_up": "08:00",
+        "out_of_bed": "08:05",
+        "morning_feeling": 3
+      },
+      "user": "larskarbo"
+    },
+    {
+      "date": "June 11, 2020",
+      "answers": {
+        "coffee": false,
+        "daytime_function": 3,
+        "bedtime": "02:00",
+        "sleep_onset_delay": "10",
+        "wake_up": "08:00",
+        "out_of_bed": "08:00",
+        "morning_feeling": 3
+      },
+      "user": "larskarbo"
+    },
+    {
+      "date": "June 12, 2020",
+      "answers": {
+        "coffee": true,
+        "daytime_function": 4,
+        "bedtime": "02:10",
+        "sleep_onset_delay": "25",
+        "wake_up": "07:15",
+        "out_of_bed": "07:50",
+        "morning_feeling": 2
+      },
+      "user": "larskarbo"
+    },
+    {
+      "date": "June 13, 2020",
+      "answers": {
+        "coffee": false,
+        "daytime_function": 4,
+        "bedtime": "01:55",
+        "sleep_onset_delay": "15",
+        "wake_up": "08:00",
+        "out_of_bed": "08:00",
+        "morning_feeling": 3
+      },
+      "user": "larskarbo"
+    },
+    {
+      "date": "June 14, 2020",
+      "answers": {
+        "coffee": true,
+        "daytime_function": 5,
+        "bedtime": "02:00",
+        "sleep_onset_delay": "40",
+        "wake_up": "08:00",
+        "out_of_bed": "08:00",
+        "morning_feeling": 4
+      },
+      "user": "larskarbo"
+    }
+  ]
+}

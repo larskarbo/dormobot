@@ -30,6 +30,7 @@
     "watch:test": "jest --watch"
   },
   "dependencies": {
+    "@types/uuid": "^8.0.0",
     "lowdb": "^1.0.0",
     "moment": "^2.26.0",
     "telegraf": "^3.38.0",
