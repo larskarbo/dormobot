@@ -89,7 +89,7 @@ bot.command("evening", async ctx => {
   const date = dateMoment.format("LL")
 
 
-  const alreadyEntry = await getAlreadyEntry(date)
+  const alreadyEntry = await getAlreadyEntry(date, ctx.from?.username)
   const quiz: Quiz = {
     type: "evening",
     questionIndex: -1,
@@ -103,11 +103,11 @@ bot.command("evening", async ctx => {
   nextQuestion(ctx);
 });
 
-const getAlreadyEntry = async (date: string) => {
+const getAlreadyEntry = async (date: string, user?: string) => {
   const alreadyEntry = await db
     .get("entries")
     .find({
-      user: "larskarbo",
+      user: user,
       date: date
     })
     .value()
@@ -121,7 +121,7 @@ const getAlreadyEntry = async (date: string) => {
 
 bot.command("morning", async ctx => {
   const date =  moment().subtract(1, "day").format("LL")
-  const alreadyEntry = await getAlreadyEntry(date)
+  const alreadyEntry = await getAlreadyEntry(date, ctx.from?.username)
 
   const quiz: Quiz = {
     type: "morning",
@@ -188,7 +188,7 @@ bot.action("save", async ctx => {
   const yo = await db
     .get("entries")
     .filter({
-      user: "larskarbo",
+      user: entry.user,
       date: entry.date
     })
     .value()
@@ -198,7 +198,7 @@ bot.action("save", async ctx => {
     console.log("update!")
     await db.get('entries')
       .find({
-        user: "larskarbo",
+        user: entry.user,
         date: entry.date
       })
       .assign({
